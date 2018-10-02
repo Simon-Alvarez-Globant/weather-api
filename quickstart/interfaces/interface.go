@@ -1,17 +1,18 @@
-package utils
+package interfaces
 
 import (
-	"encoding/json"
-	"fmt"
 	"strconv"
 	"time"
-
-	"github.com/astaxie/beego/httplib"
 )
 
-type Response struct {
+type Payload struct {
+	City    string `json:"city"`
+	Country string `json:"country"`
+}
+
+type ResponseStruct struct {
 	LocationName   string
-	temperature    string
+	Temperature    string
 	Wind           string
 	Cloudines      string
 	Pressure       string
@@ -80,29 +81,10 @@ type Sys struct {
 	Sunset  int64   `json: "sunset"`
 }
 
-func GetData(url string) (jsons Response) {
-	req := httplib.Get(url)
-	data, errReq := req.String()
-	if errReq != nil {
-		fmt.Println(errReq)
-	}
-
-	var raw Raw
-
-	err := json.Unmarshal([]byte(data), &raw)
-	if err != nil {
-		fmt.Print(err)
-	}
-
-	jsons.prepData(raw)
-
-	return
-}
-
-func (r *Response) prepData(raw Raw) {
+func (r *ResponseStruct) PrepData(raw Raw) {
 	t := raw.Main.Temp - 273.15
 	temp := strconv.FormatFloat(t, 'f', 2, 64)
-	r.temperature = temp + " ºC"
+	r.Temperature = temp + " ºC"
 
 	s := raw.Wind.Speed
 	windCondition := windCondition(s)
