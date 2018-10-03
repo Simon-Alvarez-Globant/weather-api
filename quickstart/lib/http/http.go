@@ -1,13 +1,12 @@
 package http
 
 import (
+	worker "bapi/quickstart/workers"
 	"encoding/json"
 	"fmt"
 
 	"strconv"
 	"time"
-
-	"github.com/astaxie/beego/httplib"
 )
 
 type HttpParams struct {
@@ -77,12 +76,12 @@ type sys struct {
 }
 
 func GetDataApi(url string) (jsons ResponseStruct) {
-	req := httplib.Get(url)
-	data, errReq := req.String()
-	if errReq != nil {
-		fmt.Println(errReq)
-	}
-
+	// req := httplib.Get(url)
+	// data, errReq := req.String()
+	// if errReq != nil {
+	// 	fmt.Println(errReq)
+	// }
+	data := worker.RequestOpenWeather(url)
 	var raw *raw
 
 	err := json.Unmarshal([]byte(data), &raw)
