@@ -20,16 +20,24 @@ type ResponseStruct struct {
 	GeoCoordinates []float64
 	RequestedTime  string
 }
+type RequestError struct {
+	Message string
+}
 
-func GetData(city string, country string) (jsons interface{}) {
+func (e RequestError) Error() string {
+	return e.Message
+}
+func GetData(city string, country string) (jsons interface{}, err error) {
 	if city == "" || country == "" {
-		return
+		return "", RequestError{
+			"No city or country inside the request",
+		}
 	}
 	implementation := models.SetImplementation()
-	jsons = createOrRead(implementation, city, country)
+	jsons, err = createOrRead(implementation, city, country)
 	return
 }
-func createOrRead(implementation models.Getter, city, country string) interface{} {
+func createOrRead(implementation models.Getter, city, country string) (interface{}, error) {
 	// Read Db
 	data, timestamp := models.Get(implementation, city)
 
@@ -63,8 +71,8 @@ func timelapse(t int64) bool {
 	return false
 }
 
-func unmarshal(s string) (jsons ResponseStruct) {
-	err := json.Unmarshal([]byte(s), &jsons)
+func unmarshal(s string) (jsons ResponseStruct, err error) {
+	err = json.Unmarshal([]byte(s), &jsons)
 	if err != nil {
 		fmt.Println(err)
 	}

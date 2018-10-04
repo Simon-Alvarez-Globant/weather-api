@@ -2,6 +2,7 @@ package controller
 
 import (
 	"bapi/quickstart/lib"
+	"fmt"
 
 	"github.com/astaxie/beego"
 )
@@ -22,7 +23,10 @@ func (c WeatherController) Get() {
 	city := c.GetString("city")
 	country := c.GetString("country")
 
-	json := lib.GetData(city, country)
+	json, err := lib.GetData(city, country)
+	if err != nil {
+		fmt.Println("ERROR:::::::", err)
+	}
 
 	c.Ctx.Output.Header("Content-Type", "application/json")
 	c.Ctx.Output.JSON(json, true, true)

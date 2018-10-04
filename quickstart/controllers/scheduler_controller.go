@@ -2,6 +2,7 @@ package controller
 
 import (
 	"bapi/quickstart/lib/scheduler"
+	"fmt"
 
 	"github.com/astaxie/beego"
 )
@@ -32,8 +33,10 @@ func (c SchedulerController) Put() {
 	var status int
 	err := scheduler.Schedule(param.City, param.Country)
 	if err != nil {
+		fmt.Println("ERROR:::", err)
 		status = 400
 	} else {
+		fmt.Printf("Scheduler %v, added with success \n", param.City)
 		status = 202
 	}
 

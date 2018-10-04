@@ -2,6 +2,7 @@ package scheduler
 
 import (
 	"bapi/quickstart/lib"
+	"fmt"
 
 	"github.com/astaxie/beego/toolbox"
 )
@@ -14,11 +15,6 @@ func (e RequestError) Error() string {
 	return e.Message
 }
 
-type Request struct {
-	City    string
-	Country string
-}
-
 func Schedule(city, country string) error { // add error
 	if city == "" || country == "" {
 		return RequestError{
@@ -27,7 +23,10 @@ func Schedule(city, country string) error { // add error
 	}
 
 	task := toolbox.NewTask(city, "0 0 */1 * * *", func() error {
-		lib.GetData(city, country)
+		_, err := lib.GetData(city, country)
+		if err != nil {
+			fmt.Println("ERROR::::::", err)
+		}
 		return nil
 	})
 
