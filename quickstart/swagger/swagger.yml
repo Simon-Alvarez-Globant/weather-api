@@ -1,0 +1,8 @@
+swagger: "2.0"
+info:
+  title: Weather API
+  description: This API can get the weather info of more than 200.000 cities!
+  version: 1.0.0
+  contact:
+    email: simon.alvarez@globant.com
+paths: {}

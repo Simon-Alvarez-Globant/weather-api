@@ -20,12 +20,12 @@ func init() {
 // Run the migrations
 func (m *Requests_20181001_000931) Up() {
 	// use m.SQL("CREATE TABLE ...") to make schema update
-	m.SQL(`CREATE TABLE weather_api(id INT AUTO_INCREMENT PRIMARY KEY, url VARCHAR(512), response TEXT, timestamp DATETIME)`)
-	m.SQL(`CREATE INDEX idx_url ON weather_api(url)`)
+	m.SQL(`CREATE TABLE weather(id INT AUTO_INCREMENT PRIMARY KEY, city VARCHAR(512), response TEXT, timestamp DATETIME)`)
+	m.SQL(`CREATE INDEX idx_url ON weather(city)`)
 }
 
 // Reverse the migrations
 func (m *Requests_20181001_000931) Down() {
 	// use m.SQL("DROP TABLE ...") to reverse schema update
-	m.SQL(`DROP TABLE weather_api`)
+	m.SQL(`DROP TABLE weather`)
 }

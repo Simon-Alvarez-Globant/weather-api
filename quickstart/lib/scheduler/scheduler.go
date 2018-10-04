@@ -2,24 +2,38 @@ package scheduler
 
 import (
 	"bapi/quickstart/lib"
-	"bapi/quickstart/lib/http"
 
 	"github.com/astaxie/beego/toolbox"
 )
 
-func Schedule(params http.HttpParams) (status int) {
-	if params.City == "" || params.Country == "" {
-		return 400
+type RequestError struct {
+	Message string
+}
+
+func (e RequestError) Error() string {
+	return e.Message
+}
+
+type Request struct {
+	City    string
+	Country string
+}
+
+func Schedule(city, country string) error { // add error
+	if city == "" || country == "" {
+		return RequestError{
+			"No city or country inside the request",
+		}
 	}
 
-	task := toolbox.NewTask(params.City, "0 0 */1 * * *", func() error {
-		lib.GetData(params)
+	task := toolbox.NewTask(city, "0 0 */1 * * *", func() error {
+		lib.GetData(city, country)
 		return nil
 	})
 
-	toolbox.AddTask(params.City, task)
+	toolbox.AddTask(city, task)
 	toolbox.StopTask()
 	toolbox.StartTask()
 
-	return 202
+	return nil
 }
