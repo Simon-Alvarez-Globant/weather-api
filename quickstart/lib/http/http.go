@@ -78,8 +78,8 @@ type sys struct {
 }
 
 func Get(city, country string) (response string) {
-	url := CreateUrl(city, country)
-	jsons := GetDataApi(url)
+	url := createUrl(city, country)
+	jsons := getDataApi(url)
 	resp, err := json.Marshal(jsons)
 	if err != nil {
 		fmt.Println(err)
@@ -88,7 +88,7 @@ func Get(city, country string) (response string) {
 	return
 }
 
-func GetDataApi(url string) (jsons ResponseStruct) {
+func getDataApi(url string) (jsons ResponseStruct) {
 	data := worker.RequestOpenWeather(url)
 	var raw *raw
 
@@ -103,10 +103,24 @@ func GetDataApi(url string) (jsons ResponseStruct) {
 
 }
 
+func createUrl(city, country string) string {
+	urlInit := utils.GetConfigs("externalapi")
+	appid := utils.GetConfigs("appid")
+
+	return stringify(urlInit + city + "," + country + "&appid=" + appid)
+
+}
+
+func stringify(s string) string {
+	var x strings.Builder
+	x.WriteString(s)
+	return x.String()
+}
+
 func (r *ResponseStruct) prepData(raw *raw) {
 	t := raw.Main.Temp - 273.15
 	temp := strconv.FormatFloat(t, 'f', 2, 64)
-	r.Temperature = temp + " ºC"
+	r.Temperature = stringify(temp + " ºC")
 
 	s := raw.Wind.Speed
 	windCondition := windCondition(s)
@@ -114,13 +128,13 @@ func (r *ResponseStruct) prepData(raw *raw) {
 	d := raw.Wind.Deg
 	windDirection := windDirection(d)
 
-	r.Wind = windCondition + ", " + strconv.FormatFloat(s, 'f', 2, 64) + " m/s, " + windDirection
+	r.Wind = stringify(windCondition + ", " + strconv.FormatFloat(s, 'f', 2, 64) + " m/s, " + windDirection)
 
 	r.Cloudines = raw.Weather[0].(map[string]interface{})["description"].(string)
 
-	r.Pressure = strconv.Itoa(raw.Main.Pressure) + " hpa"
+	r.Pressure = stringify(strconv.Itoa(raw.Main.Pressure) + " hpa")
 
-	r.Humidity = strconv.Itoa(raw.Main.Humidity) + "%"
+	r.Humidity = stringify(strconv.Itoa(raw.Main.Humidity) + "%")
 
 	r.Sunset = time.Unix(raw.Sys.Sunset, 0).Format("15:04")
 
@@ -130,7 +144,7 @@ func (r *ResponseStruct) prepData(raw *raw) {
 
 	r.RequestedTime = time.Now().Format("2006-01-02 15:04:05")
 
-	r.LocationName = raw.Name + ", " + raw.Sys.Country
+	r.LocationName = stringify(raw.Name + ", " + raw.Sys.Country)
 }
 
 func windCondition(s float64) string {
@@ -181,13 +195,4 @@ func windDirection(d float64) string {
 	default:
 		return "north"
 	}
-}
-
-func CreateUrl(city, country string) string {
-	urlInit := utils.GetConfigs("externalapi")
-	appid := utils.GetConfigs("appid")
-
-	var url strings.Builder
-	url.WriteString(urlInit + city + "," + country + "&appid=" + appid)
-	return url.String()
 }
