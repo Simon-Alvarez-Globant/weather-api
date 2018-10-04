@@ -1,13 +1,14 @@
 package http
 
 import (
+	"bapi/quickstart/utils"
+	worker "bapi/quickstart/workers"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"strconv"
 	"time"
-
-	"github.com/astaxie/beego/httplib"
 )
 
 type HttpParams struct {
@@ -32,7 +33,7 @@ type raw struct {
 	Coord      *coord        `json: "coord"`
 	Weather    []interface{} `json: "weather"`
 	Base       string        `json:"base"`
-	Main       *main         `json:"main"`
+	Main       *Main         `json:"main"`
 	Visibility int           `json: "visibility"`
 	Wind       *wind         `json: "wind"`
 	Clouds     *clouds       `json: "clouds"`
@@ -50,7 +51,7 @@ type coord struct {
 
 type weather struct{}
 
-type main struct {
+type Main struct {
 	Temp     float64 `json: "temp"`
 	Pressure int     `json: "pressure"`
 	Humidity int     `json: "humidity"`
@@ -76,13 +77,19 @@ type sys struct {
 	Sunset  int64   `json: "sunset"`
 }
 
-func GetDataApi(url string) (jsons ResponseStruct) {
-	req := httplib.Get(url)
-	data, errReq := req.String()
-	if errReq != nil {
-		fmt.Println(errReq)
+func Get(city, country string) (response string) {
+	url := CreateUrl(city, country)
+	jsons := GetDataApi(url)
+	resp, err := json.Marshal(jsons)
+	if err != nil {
+		fmt.Println(err)
 	}
+	response = string(resp)
+	return
+}
 
+func GetDataApi(url string) (jsons ResponseStruct) {
+	data := worker.RequestOpenWeather(url)
 	var raw *raw
 
 	err := json.Unmarshal([]byte(data), &raw)
@@ -174,4 +181,13 @@ func windDirection(d float64) string {
 	default:
 		return "north"
 	}
+}
+
+func CreateUrl(city, country string) string {
+	urlInit := utils.GetConfigs("externalapi")
+	appid := utils.GetConfigs("appid")
+
+	var url strings.Builder
+	url.WriteString(urlInit + city + "," + country + "&appid=" + appid)
+	return url.String()
 }

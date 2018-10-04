@@ -1,28 +1,43 @@
-// package worker
+package worker
 
-// import "bapi/quickstart/utils"
+import (
+	"fmt"
 
-// func worker(jobChan <-chan Job, resultChan chan<- results) {
-// 	for job := range jobChan {
-// 		process(job)
-// 	}
-// }
+	"github.com/astaxie/beego/httplib"
+)
 
-// func TryEnqueue(job Job, jobChan <-chan Job) bool {
-// 	select {
-// 	case jobChan <- job:
-// 		return true
-// 	default:
-// 		return false
-// 	}
-// }
+func worker(jobChan <-chan string, results chan<- string) {
+	for job := range jobChan {
+		req := httplib.Get(job)
+		data, errReq := req.String()
+		if errReq != nil {
+			fmt.Println(errReq)
+		}
+		results <- data
+	}
+}
 
-// func main() {
-// 	jobChan := make(chan utils.GetData(), 5)
-// 	resultChan : make(chan results,5)
-// 	// start the worker
-// 	go worker(jobChan)
+var (
+	jobChan = make(chan string, 5)
+	results = make(chan string, 5)
+)
 
-// 	// enqueue a job
-// 	jobChan <- job
-// }
+func init() {
+
+	go worker(jobChan, results)
+}
+
+func enqueue(job string) bool {
+	select {
+	case jobChan <- job:
+		return true
+	default:
+		return false
+	}
+}
+
+func RequestOpenWeather(url string) string {
+	enqueue(url)
+	return <-results
+
+}

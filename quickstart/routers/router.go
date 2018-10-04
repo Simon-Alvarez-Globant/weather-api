@@ -1,3 +1,7 @@
+// @APIVersion 1.0.0
+// @Title Weather API
+// @Description This API can get the weather info of more than 200.000 cities!
+// @Contact simon.alvarez@globant.com
 package routers
 
 import (
